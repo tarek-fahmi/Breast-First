@@ -10,7 +10,17 @@ class Node:
         self.depth = depth
         self.codes = []
 
+        self.parent = None
         self.children = []  # Array of child nodes.
+        
+    def get_path(list: List):
+        """
+        recursively determines the direct path to the root node in the tree.
+        """
+        
+        pass
+        
+    
 
 class Tree:
     """
@@ -23,7 +33,8 @@ class Tree:
     
     Fringe and expanded nodes are stored in Node arrrays.
     """
-    def  __init__(self, rgb_v: str):
+    def  __init__(self, rgb_v: str, goal_codes, unsafe_codes):
+        
         new_root = Node(rgb_v)
         self.root = self.build_tree_from_root(new_root)
         
@@ -31,8 +42,8 @@ class Tree:
         self.check_k_within_range()
         
         
-        self.goal_codes = [] # String array contains goal codes extracted from input file.
-        self.unsafe_codes = [] # Disallowed states, extracted from input file.
+        self.goal_codes = goal_codes # String array contains goal codes extracted from input file.
+        self.unsafe_codes = unsafe_codes # Disallowed states, extracted from input file.
         
         self.queue = [] # Special array based data-type (First In = First Out), stores fringe nodes.
         self.visited = [] # Standard array, stores already expanded/visited nodes.
@@ -63,7 +74,7 @@ class Tree:
         return 0
         
 
-    def build_tree_from_root(self, node: Node):
+    def build_tree(self, node: Node):
         """
         Based on rgb_v, returns a list of child nodes which will be added to the tree.
         
@@ -120,4 +131,71 @@ class Tree:
             print("SEARCH FAILED")
             exit(-1)
     
+    @staticmethod
+    def get_path(node: Node):
+        
     
+    @staticmethod
+    def breadth_first_search(tree: Tree):
+        """
+        Starting from leftmost neighbor, explore all neighbors, before expanding.
+        """
+        current_node = tree.root
+        fringe = tree.fringe_nodes
+        
+        tree.expand_node(current_node)
+        
+        
+        
+        while True:
+            current_layer = 
+            for node in tree.fringe_nodes:
+                
+                if tree.expand_node(node) == 1:
+                    print(tree.fringe_nodes)
+            
+            fringe = tree.fringe_nodes
+                
+            
+    @staticmethod
+    def depth_first_search(tree: Tree, max_depth: int = 9e9):
+        """
+        Explore the deepest leftmost node before exploring parents and siblings (Step-Bros and slutty Step-Sis stuck under the water).
+        """
+        
+        current_node = tree.root
+        fringe = tree.fringe_nodes
+        
+        tree.expand_node(current_node)
+        
+        print(tree.expanded_nodes)
+        print(tree.fringe_nodes)
+        
+        
+    @staticmethod
+    def iterative_deepening_search(tree: Tree, max_depth):
+        """
+        Incremently conduct depth first search at increasing tree depths.
+        """
+        return
+        
+    @staticmethod
+    def greedy_search(tree: Tree):
+        """
+        Choose path of lowest heuristic value from fringe nodes (leftmost tiebreaking).
+        """
+        return
+    
+    @staticmethod
+    def a_star_search(tree: Tree):
+        """
+        
+        """
+        return
+
+    def hill_climbing_search(tree: Tree):
+        """
+        
+        """
+        return
+srt = 'srt'
