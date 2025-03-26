@@ -1,6 +1,3 @@
-
-
-
 class Node:
 
     def __init__(self, rgb_v, depth: int = 0):
@@ -10,15 +7,9 @@ class Node:
         self.depth = depth
         self.codes = []
 
-        self.parent = None
+        self.parent: Node = None
         self.children = []  # Array of child nodes.
         
-    def get_path(list: List):
-        """
-        recursively determines the direct path to the root node in the tree.
-        """
-        
-        pass
         
     
 
@@ -26,7 +17,8 @@ class Tree:
     """
     This tree will represent all possible index inversions up to a depth of k.
     
-    The root node stores the start code, and the goal is to algorithmically search the tree
+    The root node stores the start code, and the goal is to algorithmically
+    search the tree
     for the given goal codes.
     
     Goal codes and start codes are stored as String arrays.
@@ -47,12 +39,13 @@ class Tree:
         
         self.queue = [] # Special array based data-type (First In = First Out), stores fringe nodes.
         self.visited = [] # Standard array, stores already expanded/visited nodes.
+        self.stack = [] # Stack array...
         
         self.n_expanded = 0 # Tracks the number of nodes we have expanded thus far, avoids need to recalculate.
     
     
     
-    def expand_node(self, node: Node):
+    def visit_node(self, node: Node, is_dfs: bool = False):
         """
         Expands a node, adding the node's children to the fringe and
         the node itself to expanded nodes list.
@@ -60,51 +53,73 @@ class Tree:
         if self.n_expanded >= 1000: # Check if max expansions hit.
             return -1
         
-        self.expanded_nodes.add(node) # Add to list of expanded nodes
+        self.expanded.add(node) # Add to list of expanded nodes
         
         self.n_expanded += 1 # Increment counter
-        
-        
-        node.children = self.get_children(node.rgb_v) # Compute children of this node based on rgb_v
-        
+                
         if node.depth < self.k: # If we have yet to reach max depth, add children to fringe.
-            self.queue.add(node.children)
-            self.nodes.add(node.children)
+            self.queue.remove(0)
+            if is_dfs:
+                self.queue = node.children + self.queue
+            else:
+                self.queue.add(node.children)
+                self.nodes.add(node.children)
             
         return 0
+        
+    def set_hamming_value(self, node):
+        """
+        Returns the minimum hamming values for a node based on possible goal nodes.
+        """
+        hamming_distances = [] # For each goal state, compute MHD relative to that goal state.
+        
+        for code in self.goal_codes:
+            current_hamming_distance = 0
+            
+            for char in len(range(code)):
+                if code[i] == node.rgb_v:
+                    current_hamming_distance += 1
+                    
+            hamming_distances += current_hamming_distance
+            
+        node.mhd = min(hamming_distances)
+        return 
+            
         
 
     def build_tree(self, node: Node):
         """
-        Based on rgb_v, returns a list of child nodes which will be added to the tree.
+        Based on rgb_v, returns a list of child nodes which will be added
+        to the tree.
         
         Nodes are in ascending order in terms of the index of inversion.
         
         Will return None if depth exceeds k or k is invalid.
         """
-        temp = node.rgb_v
+        current_rgb_inversion = node.rgb_v
         kids = []
+        
     
-        # Create k inversions, at each index.
-        for i in range(len(temp)):
-            if temp[i] == '1':
-                temp[i] = '0'
-            else:
-                temp[i] = '1'
-            
-            # Check if node is legal and unique.
-            if self.check_safe(temp) and temp not in self.codes:
-                new_kid += Node(temp)
-            else:
-                return -1
-            
-            self.queue += new_kid
-            kids += new_kid
-            if depth >= self.k:
-                return -1
-            else:
-                return self.get_children(rgb_v, depth + 1)
-    
+        while True:
+            # Create k inversions, at each index.
+            for i in range(len(current_rgb_inversion)):
+                if current_rgb_inversion[i] == '1':
+                    current_rgb_inversion[i] = '0'
+                else:
+                    current_rgb_inversion[i] = '1'
+                
+                # Check if node is legal.
+                if self.check_safe(current_rgb_inversion):
+                    new_kid = Node(current_rgb_inversion)
+                    self.set_hamming_value(new_kid)
+                    
+                else:
+                    return -1
+                
+                self.queue += new_kid
+
+                # TODO: complete building function.
+        
         return kids
 
         
@@ -116,7 +131,7 @@ class Tree:
     
     def get_safe(self, node: Node):
         "Check if current node is outside of disallowed nodes sublist."
-        if rgb_v in self.unsafe_codes:
+        if node.rgb_v in self.unsafe_codes:
             return True
         return False
     
@@ -132,68 +147,116 @@ class Tree:
             exit(-1)
     
     @staticmethod
-    def get_path(node: Node):
+    def get_path(node: Node, arr: list = []):
+        list.push(node.rgb_v)
+        
+        if node.parent == None: # Base case (final step of recursion)
+            return list
+        else:
+            return get_path(node.parent, arr) # Recursive case (the condition where you continue to work on subproblems)
+
+    @staticmethod
+    def failed_search():
+        """
+        Report a failed search and exit with error code...
+        """
+        
+        print("SEARCH FAILED")
+        exit(-1)
         
     
     @staticmethod
-    def breadth_first_search(tree: Tree):
+    def breadth_first_search(self):
         """
         Starting from leftmost neighbor, explore all neighbors, before expanding.
         """
-        current_node = tree.root
-        fringe = tree.fringe_nodes
+        self.visit_node(self.root)
         
-        tree.expand_node(current_node)
+        path = []
         
-        
-        
-        while True:
-            current_layer = 
-            for node in tree.fringe_nodes:
+        while self.queue: #so long as the queue is not empty
+            for node in self.queue:
                 
-                if tree.expand_node(node) == 1:
-                    print(tree.fringe_nodes)
+                self.visit_node(node)
+
+                if self.check_goal(node):
+                    break 
             
-            fringe = tree.fringe_nodes
-                
+        if self.check_goal(node): # If we have ended on a goal node...
+            path = self.get_path(node)
+            return (path, self.visited)
+        else: # If we have not ended on a goal node...
+            self.failed_search()
+        
+        
+    def depth_first_search(self, max_depth: int = 9e9):
+        """
+        Explore the deepest leftmost node before exploring parents and siblings 
+        """
+        
+        self.visit_node(self.root)
+        
+        while self.queue: # While there are still nodes to visit:
             
-    @staticmethod
-    def depth_first_search(tree: Tree, max_depth: int = 9e9):
-        """
-        Explore the deepest leftmost node before exploring parents and siblings (Step-Bros and slutty Step-Sis stuck under the water).
-        """
+            for node in self.queue: # Continue visiting nodes....
+                self.visit_node(node, True) 
+
+                if node.depth < max_depth: # If the current node's children are in the depth limited subtree.
+                    self.visit_node()
+                    
+                if self.check_goal(node): # If we have found a goal node, end the search.
+                    break
         
-        current_node = tree.root
-        fringe = tree.fringe_nodes
+        if self.check_goal(node): # If the search ended on a goal node, then return the paths.
+            path = self.get_path(node)
+            return (path, self.visited)
         
-        tree.expand_node(current_node)
+        else: # If we have not ended on a goal node, throw error.
+            return -1
+            
         
-        print(tree.expanded_nodes)
-        print(tree.fringe_nodes)
-        
-        
-    @staticmethod
-    def iterative_deepening_search(tree: Tree, max_depth):
+    def iterative_deepening_search(self):
         """
         Incremently conduct depth first search at increasing tree depths.
         """
-        return
-        
-    @staticmethod
-    def greedy_search(tree: Tree):
-        """
-        Choose path of lowest heuristic value from fringe nodes (leftmost tiebreaking).
-        """
-        return
+        self.visit_node(self.root)
     
-    @staticmethod
-    def a_star_search(tree: Tree):
+        
+        for i in range(self.k): #Iterate through integers up to max depth.
+            
+            result = self.depth_first_search(i): # Run DFS with current max depth.
+                
+            if result is not -1:
+                break
+            else:
+                continue
+        
+        return result
+                
+            
+        
+    def greedy_search(self):
+        """
+        Choose path of lowest heuristic value from fringe nodes 
+        (leftmost tiebreaking).
+        """
+        self.visit_node(self.root)
+        
+        path = []
+        
+        while self.queue: #so long as the queue is not empty
+            for node in self.queue:
+                
+                if self.queue > 1:
+                    min_node_mhd
+    
+    def a_star_search(self):
         """
         
         """
         return
 
-    def hill_climbing_search(tree: Tree):
+    def hill_climbing_search(self):
         """
         
         """

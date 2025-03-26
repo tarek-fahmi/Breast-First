@@ -6,23 +6,37 @@ import src.search_algorithms as s_obj
 def broken_printer(char, filename):
     tree  = setup_input(filename)
     
+    path = []
+    expanded = []
+    
+    
     match char: # Check which search the user has requested.
         case 'B':
-            s_obj.breadth_first_search(tree)
+            (path, expanded) = s_obj.breadth_first_search(tree)
         case 'D':
-            s_obj.depth_first_search(tree)
+            (path, expanded) = s_obj.depth_first_search(tree)
         case 'G':
-            s_obj.greedy_search(tree)
+            (path, expanded) = s_obj.greedy_search(tree)
         case 'I':
-            s_obj.iterative_deepening_search(tree)
+            (path, expanded) = s_obj.iterative_deepening_search(tree)
         case 'A':
-            s_obj.a_star_search(tree)
+            (path, expanded) = s_obj.a_star_search(tree)
         case 'H':
-            s_obj.hill_climbing(tree)
+            (path, expanded) = s_obj.hill_climbing(tree)
         case _:
             print("Did not pick valid search strategy... Try running script again :)")
         
-        
+    clean_print(path)
+    clean_print(expanded)
+
+def clean_print(list):
+    
+    for code in list[:-1]:
+        print(code + ',')
+    
+    print(code)
+
+    return 
             
 
 def setup_input(filename):
